@@ -6,9 +6,9 @@
     <slot name="indicator"></slot>
     <div class="indicator">
        <!-- v-for="(item, index) in slideCount" :key="index"  -->
-      <!-- <slot name="indicator"> -->
+      <slot name="indicator" v-if="showIndicator && slideCount > 1">
         <div class="indi-item" v-for="(item, index) in slideCount" :key="index" :class="{active: index == currentIndex - 1}"></div>
-      <!-- </slot> -->
+      </slot>
     </div>
   </div>
 </template>
@@ -33,6 +33,12 @@ export default {
     moveRadio: {
       type: Number,
       default: 0.25
+    },
+
+    // 是否显示底部标识
+    showIndicator: {
+      type: Boolean,
+      default: true
     }
   },
   data() {
@@ -228,7 +234,6 @@ export default {
     bottom: 8px;
     right: 0;
     left: 0;
-    z-index: 3;
   }
 
   .indi-item{
