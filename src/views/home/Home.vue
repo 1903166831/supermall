@@ -1,115 +1,24 @@
 <template>
   <div id="home">
     <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
-    <home-swiper :banners="banners"/>
-    <recommend-view :recommends="recommends"/>
-    <feature-view/>
-    <tab-control class="tab-control" :titles="['流行', '新歌', '精选']" @tabClick="tabClick"/>
 
-    <goods-list :goods="goods['pop'].list"/>
+    <scroll class="wrapper"
+            ref="scroll"
+            @contentScroll="contentScroll"
+            @pullingUp="loadMore"
+            :probe-type="3"
+            :pull-up-load="true">
+      <home-swiper :banners="banners"/>
+      <recommend-view :recommends="recommends"/>
+      <feature-view/>
+      <tab-control class="tab-control"
+                  :titles="['流行', '新款', '精选']"
+                  @tabClick="tabClick"/>
+      <goods-list :goods="showGoods"/>
+    </scroll>
 
-    <ul>
-      <li>测试文字1</li>
-      <li>测试文字2</li>
-      <li>测试文字3</li>
-      <li>测试文字4</li>
-      <li>测试文字5</li>
-      <li>测试文字6</li>
-      <li>测试文字7</li>
-      <li>测试文字8</li>
-      <li>测试文字9</li>
-      <li>测试文字10</li>
-      <li>测试文字11</li>
-      <li>测试文字12</li>
-      <li>测试文字13</li>
-      <li>测试文字14</li>
-      <li>测试文字15</li>
-      <li>测试文字16</li>
-      <li>测试文字17</li>
-      <li>测试文字18</li>
-      <li>测试文字19</li>
-      <li>测试文字20</li>
-      <li>测试文字21</li>
-      <li>测试文字22</li>
-      <li>测试文字23</li>
-      <li>测试文字24</li>
-      <li>测试文字25</li>
-      <li>测试文字26</li>
-      <li>测试文字27</li>
-      <li>测试文字28</li>
-      <li>测试文字29</li>
-      <li>测试文字30</li>
-      <li>测试文字31</li>
-      <li>测试文字32</li>
-      <li>测试文字33</li>
-      <li>测试文字34</li>
-      <li>测试文字35</li>
-      <li>测试文字36</li>
-      <li>测试文字37</li>
-      <li>测试文字38</li>
-      <li>测试文字39</li>
-      <li>测试文字40</li>
-      <li>测试文字41</li>
-      <li>测试文字42</li>
-      <li>测试文字43</li>
-      <li>测试文字44</li>
-      <li>测试文字45</li>
-      <li>测试文字46</li>
-      <li>测试文字47</li>
-      <li>测试文字48</li>
-      <li>测试文字49</li>
-      <li>测试文字50</li>
-      <li>测试文字51</li>
-      <li>测试文字52</li>
-      <li>测试文字53</li>
-      <li>测试文字54</li>
-      <li>测试文字55</li>
-      <li>测试文字56</li>
-      <li>测试文字57</li>
-      <li>测试文字58</li>
-      <li>测试文字59</li>
-      <li>测试文字60</li>
-      <li>测试文字61</li>
-      <li>测试文字62</li>
-      <li>测试文字63</li>
-      <li>测试文字64</li>
-      <li>测试文字65</li>
-      <li>测试文字66</li>
-      <li>测试文字67</li>
-      <li>测试文字68</li>
-      <li>测试文字69</li>
-      <li>测试文字70</li>
-      <li>测试文字71</li>
-      <li>测试文字72</li>
-      <li>测试文字73</li>
-      <li>测试文字74</li>
-      <li>测试文字75</li>
-      <li>测试文字76</li>
-      <li>测试文字77</li>
-      <li>测试文字78</li>
-      <li>测试文字79</li>
-      <li>测试文字80</li>
-      <li>测试文字81</li>
-      <li>测试文字82</li>
-      <li>测试文字83</li>
-      <li>测试文字84</li>
-      <li>测试文字85</li>
-      <li>测试文字86</li>
-      <li>测试文字87</li>
-      <li>测试文字88</li>
-      <li>测试文字89</li>
-      <li>测试文字90</li>
-      <li>测试文字91</li>
-      <li>测试文字92</li>
-      <li>测试文字93</li>
-      <li>测试文字94</li>
-      <li>测试文字95</li>
-      <li>测试文字96</li>
-      <li>测试文字97</li>
-      <li>测试文字98</li>
-      <li>测试文字99</li>
-      <li>测试文字100</li>
-    </ul>
+    <back-top @click.native="backClick" v-show="isBackShow"/>
+
   </div>
 </template>
 
@@ -121,6 +30,8 @@
   import NavBar from 'components/common/navbar/NavBar'
   import TabControl from 'components/content/tabControl/TabControl'
   import GoodsList from 'components/content/goods/GoodsList'
+  import Scroll from 'components/common/scroll/Scroll'
+  import BackTop from 'components/content/backTop/BackTop'
 
   import { getHomeMultidata, getHomeGoods } from 'network/home'
 
@@ -135,7 +46,8 @@
           'new': {page: 0, list: []},
           'sell': {page: 0, list: []}
         },
-        currentIndex: 'pop'
+        currentType: 'pop',
+        isBackShow: false
       }
     },
     components: {
@@ -144,7 +56,14 @@
       FeatureView,
       NavBar,
       TabControl,
-      GoodsList
+      GoodsList,
+      Scroll,
+      BackTop
+    },
+    computed: {
+      showGoods() {
+        return this.goods[this.currentType].list
+      }
     },
     created() {
       // 1. 请求多个数据
@@ -158,16 +77,30 @@
     methods: {
       // 事件监听的相关方法
       tabClick(index) {
-        this.currentIndex = index
-        switch (currentIndex) {
-          case 1:
-            this.currentIndex = 'new'
+        switch (index) {
+          case 0:
+            this.currentType = 'pop'
             break;
-
-          default:
+          case 1:
+            this.currentType = 'new'
+            break;
+          case 2:
+            this.currentType = 'sell'
             break;
         }
       },
+      backClick() {
+        // this.$refs.scroll.scroll.scrollTo(0, 0, 500)    // 调用 BScroll 对象中的 scrollTo 方法 前两个参数：跳转到的位置  第三个参数：跳转时间(选填)
+        this.$refs.scroll.scrollTo(0, 0)
+      },
+      contentScroll(position) {
+        this.isBackShow = (-position.y) > 1000
+      },
+      loadMore() {
+        this.getHomeGoods(this.currentType)
+        this.$refs.scroll.finishPullUp()
+      },
+
 
       // 网络请求的相关方法
       getHomeMultidata() {
@@ -193,6 +126,8 @@
 <style scoped>
   #home{
     padding-top: 44px;
+    height: 100vh;
+    box-sizing: border-box;
   }
   .home-nav{
     background-color: var(--color-tint);
@@ -219,5 +154,9 @@
   .tab-control {
     position: sticky;
     top: 44px;
+  }
+
+  .wrapper{
+    height: calc(100vh - 93px);
   }
 </style>
