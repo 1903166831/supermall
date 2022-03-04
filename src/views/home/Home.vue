@@ -2,10 +2,11 @@
   <div id="home">
     <nav-bar class="home-nav"><div slot="center">购物街</div></nav-bar>
 
+<!-- @pullingUp="loadMore" -->
     <scroll class="wrapper"
             ref="scroll"
             @contentScroll="contentScroll"
-            @pullingUp="loadMore"
+
             :probe-type="3"
             :pull-up-load="true">
       <home-swiper :banners="banners"/>
@@ -74,6 +75,18 @@
       this.getHomeGoods("new")
       this.getHomeGoods("sell")
     },
+    mounted() {
+      // 4. 引入防抖
+      const refresh = this.debounce(this.$refs.scroll.refresh)
+
+      // 3. 监听 goodsItem 中的图片加载
+      this.$bus.$on("itemImageLoad", () => {
+        refresh()
+      })
+    },
+    destroyed() {
+      this.$bus.$off()
+    },
     methods: {
       // 事件监听的相关方法
       tabClick(index) {
@@ -96,9 +109,17 @@
       contentScroll(position) {
         this.isBackShow = (-position.y) > 1000
       },
-      loadMore() {
-        this.getHomeGoods(this.currentType)
-        this.$refs.scroll.finishPullUp()
+      // loadMore() {
+      //   this.getHomeGoods(this.currentType)
+      // },
+      debounce(func, delay=300) {     // 防抖的封装函数
+        let timer = null
+        return function (...args) {
+          if (timer) clearTimeout(timer)
+          timer = setTimeout(() => {
+            func.apply(this, args)
+          }, delay)
+        }
       },
 
 
@@ -114,6 +135,8 @@
         getHomeGoods(type, page).then(res => {
           this.goods[type].list.push(...res.data.list)
           this.goods[type].page ++
+
+          // this.$refs.scroll.finishPullUp()
         })
       }
 
@@ -136,7 +159,7 @@
     top: 0;
     left: 0;
     right: 0;
-    z-index: 3;
+    z-index: 1000;
   }
   .swiper{
     position: relative;

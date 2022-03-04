@@ -43,18 +43,22 @@
       })
 
       // 3. 触底加载
-      this.scroll.on("pullingUp", () => {
-        this.$emit("pullingUp")
-      })
+      // this.scroll.on("pullingUp", () => {
+      //   this.$emit("pullingUp")
+      // })
     },
     methods: {
       // 封装
       // ES6 的默认参数写法
       scrollTo(x, y, time=500) {    // 定位滚动的位置
-        this.scroll.scrollTo(x, y, time)
+        this.scroll && this.scroll.scrollTo(x, y, time)
       },
       finishPullUp() {    // 让下拉加载时间可以再次触发
         this.scroll.finishPullUp()
+      },
+      refresh() {     // 强制 better-scroll 实例刷新 更新滚动高度
+        this.scroll && this.scroll.refresh()
+        console.log("refresh");
       }
     }
   }
